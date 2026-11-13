@@ -1,0 +1,24 @@
+# Node Dependencies & Build Output (Frontend)
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+
+# Cypress Videos & Screenshots
+frontend/cypress/videos/
+frontend/cypress/screenshots/
+
+# Java / Maven / Quarkus (Backend)
+backend/target/
+backend/.mvn/
+*.class
+
+# IDE & OS Files
+.DS_Store
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.suo
+*.user

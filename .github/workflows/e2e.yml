@@ -1,0 +1,42 @@
+name: KBE E2E Test Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  e2e-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v7
+
+      - name: Java & Maven einrichten (Quarkus Backend)
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Node.js einrichten (Frontend & Cypress)
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+
+      - name: Quarkus Backend im Hintergrund starten
+        run: |
+          mvn quarkus:dev &
+          # Warten, bis das Backend auf Port 8080 erreichbar ist
+          until curl -s http://localhost:8080/api/todos; do
+            sleep 2
+          done
+
+      - name: Frontend Dependencies installieren & bauen
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Cypress E2E Tests im Headless Modus ausführen
+        working-directory: ./frontend
+        run: npx cypress run --browser electron

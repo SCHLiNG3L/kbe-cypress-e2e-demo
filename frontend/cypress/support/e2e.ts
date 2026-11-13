@@ -1,0 +1,1 @@
+// Globale Befehle oder Importe für Cypress
