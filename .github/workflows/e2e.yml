@@ -28,12 +28,19 @@ jobs:
       - name: Quarkus Backend im Hintergrund starten
         run: |
           mvn quarkus:dev &
-          # Warten, bis das Backend auf Port 8080 erreichbar ist
-          until curl -s http://localhost:8080/api/todos; do
+          echo "Warte auf Quarkus Backend..."
+          # Bis zu 60 Sekunden warten, bis Port 8080 antwortet
+          for i in {1..30}; do
+            if curl -s http://localhost:8080/api/todos; then
+              echo "Backend ist erreichbar!"
+              exit 0
+            fi
             sleep 2
           done
+          echo "Timeout: Backend ist nicht rechtzeitig gestartet."
+          exit 1
 
-      - name: Frontend Dependencies installieren & bauen
+      - name: Frontend Dependencies installieren
         working-directory: ./frontend
         run: npm ci
 
