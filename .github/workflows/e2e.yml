@@ -25,24 +25,40 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Frontend Dependencies installieren
+        working-directory: ./frontend
+        run: npm ci
+
       - name: Quarkus Backend im Hintergrund starten
         run: |
+          # Startet Maven/Quarkus im Hintergrund
           mvn quarkus:dev &
-          echo "Warte auf Quarkus Backend..."
-          # Bis zu 60 Sekunden warten, bis Port 8080 antwortet
-          for i in {1..30}; do
-            if curl -s http://localhost:8080/api/todos; then
+          echo "Warte auf Quarkus Backend (Port 8080)..."
+          for i in {1..40}; do
+            if curl -s http://127.0.0.1:8080/api/todos; then
               echo "Backend ist erreichbar!"
               exit 0
             fi
-            sleep 2
+            sleep 3
           done
           echo "Timeout: Backend ist nicht rechtzeitig gestartet."
           exit 1
 
-      - name: Frontend Dependencies installieren
+      - name: Vue 3 Frontend im Hintergrund starten
         working-directory: ./frontend
-        run: npm ci
+        run: |
+          # Startet den Vite Dev-Server im Hintergrund
+          npm run dev -- --host 127.0.0.1 &
+          echo "Warte auf Frontend (Port 5173)..."
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:5173; then
+              echo "Frontend ist erreichbar!"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Timeout: Frontend ist nicht rechtzeitig gestartet."
+          exit 1
 
       - name: Cypress E2E Tests im Headless Modus ausführen
         working-directory: ./frontend
